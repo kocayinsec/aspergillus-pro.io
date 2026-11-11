@@ -322,7 +322,7 @@ class ThreatAnalyzerDashboard {
 
     async toggleMonitoring() {
         const button = document.getElementById('monitor-toggle');
-        const interface = document.getElementById('interface-input').value;
+        const iface = document.getElementById('interface-input').value;
         
         try {
             if (this.isMonitoring) {
@@ -337,7 +337,7 @@ class ThreatAnalyzerDashboard {
                 const response = await fetch('/api/monitoring/start', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ interface })
+                    body: JSON.stringify({ interface: iface })
                 });
                 const result = await response.json();
                 

@@ -127,8 +127,7 @@ class ThreatAnalyzerAPI:
         self.app.websocket("/ws")(self.websocket_endpoint)
 
     async def dashboard_page(self, request: Request):
-        return self.templates.TemplateResponse("dashboard.html", {
-            "request": request,
+        return self.templates.TemplateResponse(request, "dashboard.html", {
             "title": "Network Threat Analyzer Dashboard"
         })
 
@@ -150,7 +149,7 @@ class ThreatAnalyzerAPI:
     async def get_threats(self, limit: int = 100, severity: Optional[str] = None):
         try:
             if self.database:
-                threats = self.database.get_recent_threats(limit=limit)
+                threats = self.database.get_threats(limit=limit)
                 if severity:
                     threats = [t for t in threats if t.get('severity', '').lower() == severity.lower()]
                 return {"threats": threats, "count": len(threats)}
@@ -190,7 +189,7 @@ class ThreatAnalyzerAPI:
                 "type": "monitoring_started",
                 "interface": interface,
                 "timestamp": datetime.now().isoformat()
-            }))
+            }, default=str))
             
             return {"status": "started", "interface": interface}
         except Exception as e:
@@ -208,7 +207,7 @@ class ThreatAnalyzerAPI:
         await self.connection_manager.broadcast(json.dumps({
             "type": "monitoring_stopped",
             "timestamp": datetime.now().isoformat()
-        }))
+        }, default=str))
         
         return {"status": "stopped"}
 
@@ -232,7 +231,7 @@ class ThreatAnalyzerAPI:
                 "type": "connection_established",
                 "stats": await self.get_stats(),
                 "timestamp": datetime.now().isoformat()
-            }))
+            }, default=str))
             
             while True:
                 # Keep connection alive and handle client messages
@@ -243,7 +242,7 @@ class ThreatAnalyzerAPI:
                     await websocket.send_text(json.dumps({
                         "type": "pong",
                         "timestamp": datetime.now().isoformat()
-                    }))
+                    }, default=str))
                 
         except WebSocketDisconnect:
             self.connection_manager.disconnect(websocket)
@@ -283,7 +282,7 @@ class ThreatAnalyzerAPI:
                             "type": "threat_alert",
                             "threat": threat,
                             "timestamp": datetime.now().isoformat()
-                        }))
+                        }, default=str))
                 
                 # Update stats and broadcast
                 self.stats["last_update"] = datetime.now().isoformat()
@@ -291,7 +290,7 @@ class ThreatAnalyzerAPI:
                     "type": "stats_update",
                     "stats": self.stats,
                     "timestamp": datetime.now().isoformat()
-                }))
+                }, default=str))
                 
                 # Clean old active threats (keep last 50)
                 if len(self.stats["active_threats"]) > 50:

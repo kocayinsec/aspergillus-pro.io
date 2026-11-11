@@ -12,10 +12,6 @@ import subprocess
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-# Kill any existing servers
-subprocess.run(["pkill", "-f", "uvicorn"], capture_output=True)
-time.sleep(1)
-
 print("🛡️  Aspergillus Pro - Network Monitoring Dashboard")
 print("=" * 60)
 
